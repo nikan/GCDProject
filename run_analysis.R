@@ -21,9 +21,11 @@ y_train <- read.table("./train/y_train.txt", quote="\"")
 #Combining X and y train data
 syX_train <- cbind(subject_train,y_train,X_train)
 
+#Fist Required Step
 #Merging test and train data
 CombinedTestTrain <- rbind(syX_test,syX_train)
 
+#Fourth step performed before the second and third
 #Assigning variable names
 names(CombinedTestTrain) <- c("subject", "activity_id", as.character(features$V2))
 
@@ -31,12 +33,15 @@ names(CombinedTestTrain) <- c("subject", "activity_id", as.character(features$V2
 duplicateCols <- duplicated(names(CombinedTestTrain))
 CleanData <- CombinedTestTrain[,!duplicateCols]
 
-#Retrieving only cols with mean or std in their labels
+#Second Step:Extracts only the measurements on the mean and standard deviation for each measurement. 
+#Retrieving only cols with mean or std in their labels along with the later needed subject and activity
 CleanDataMeanStd <- select(CleanData, matches("(subject|activity|std|mean)", ignore.case=TRUE))
+
+#Third Step: Uses descriptive activity names to name the activities in the data set
 CleanDataMeanStd_withActivityLabels <- inner_join(activity_labels,CleanDataMeanStd, by="activity_id")
 CleanDataMeanStd_withActivityLabels <- select(CleanDataMeanStd_withActivityLabels, -contains("activity_id"))
 
-
+#Fifth Step:From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject
 meltData <- melt(CleanDataMeanStd_withActivityLabels, id=c("subject","activity_label"))
 castedData <- dcast(meltData, subject + activity_label ~ variable, mean)
 
